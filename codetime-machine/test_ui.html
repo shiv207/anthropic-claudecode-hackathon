@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Time Machine - Test UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold mb-2 text-gray-900">Code Time Machine</h1>
+        <p class="text-gray-600 mb-8">API Test Interface</p>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- API Status -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">API Status</h2>
+                <div id="api-status" class="text-gray-500">
+                    Checking...
+                </div>
+            </div>
+            
+            <!-- Test Commit Analysis -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Test Commit Analysis</h2>
+                <button 
+                    id="test-analysis"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onclick="testCommitAnalysis()"
+                >
+                    Test Analysis
+                </button>
+                <div id="analysis-result" class="mt-4 text-sm"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = "http://localhost:8000";
+        
+        // Check API status on load
+        window.onload = function() {
+            checkAPIStatus();
+        };
+        
+        async function checkAPIStatus() {
+            const statusEl = document.getElementById('api-status');
+            try {
+                const response = await fetch(API_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    statusEl.innerHTML = `
+                        <span class="text-green-600 font-medium">✓ API Running</span>
+                        <div class="mt-2 text-sm text-gray-600">
+                            Version: ${data.version || '1.0.0'}
+                        </div>
+                    `;
+                } else {
+                    statusEl.innerHTML = `
+                        <span class="text-red-600 font-medium">✗ API Error</span>
+                        <div class="mt-2 text-sm text-gray-600">
+                            Status: ${response.status}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusEl.innerHTML = `
+                    <span class="text-red-600 font-medium">✗ Connection Failed</span>
+                    <div class="mt-2 text-sm text-gray-600">
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testCommitAnalysis() {
+            const resultEl = document.getElementById('analysis-result');
+            const button = document.getElementById('test-analysis');
+            
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            resultEl.innerHTML = '<div class="text-gray-500">Sending request...</div>';
+            
+            const mockDiff = `diff --git a/src/main.py b/src/main.py\nindex 1234567..abcdefg 100644\n--- a/src/main.py\n+++ b/src/main.py\n@@ -10,6 +10,8 @@ def api_endpoint():\n     data = request.get_json()\n     if not data:\n         return jsonify({'error': 'No data provided'}), 400\n+    \n+    # Added validation for user_id\n     user_id = data.get('user_id')\n     if not user_id:\n         return jsonify({'error': 'user_id is required'}), 400`;
+            
+            try {
+                const response = await fetch(`${API_URL}/analyze-commit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        commit_hash: 'abc123',
+                        repo_path: '/test/repo',
+                        diff_content: mockDiff
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultEl.innerHTML = `
+                        <div class="text-green-600 font-medium mb-2">✓ Success</div>
+                        <div class="space-y-2">
+                            <div><strong>Commit:</strong> ${data.commit_hash}</div>
+                            <div><strong>Risk Level:</strong> ${data.risk_level}</div>
+                            <div class="mt-2 p-3 bg-gray-50 rounded">
+                                <strong>Analysis Preview:</strong><br>
+                                ${data.analysis.substring(0, 300)}...
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const error = await response.text();
+                    resultEl.innerHTML = `
+                        <div class="text-red-600 font-medium">✗ API Error</div>
+                        <div class="mt-2 text-sm text-gray-600">${error}</div>
+                    `;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `
+                    <div class="text-red-600 font-medium">✗ Network Error</div>
+                    <div class="mt-2 text-sm text-gray-600">${error.message}</div>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test Analysis';
+            }
+        }
+    </script>
+</body>
+</html>

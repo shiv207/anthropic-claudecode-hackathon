@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --term-green: #a6e3a1;
+    /* cat-green */
+    --term-amber: #fab387;
+    /* cat-peach */
+    --term-bg: #1e1e2e;
+    /* cat-base */
+}
+
+body {
+    background-color: var(--term-bg);
+    color: #cdd6f4;
+    /* cat-text */
+    font-family: var(--font-vt323), monospace;
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+/* CRT Scanlines */
+.crt::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(to bottom,
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    z-index: 50;
+    pointer-events: none;
+}
+
+/* CRT Flicker */
+.crt::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(18, 16, 16, 0.1);
+    opacity: 0;
+    z-index: 50;
+    pointer-events: none;
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.0279;
+    }
+
+    5% {
+        opacity: 0.0348;
+    }
+
+    10% {
+        opacity: 0.0232;
+    }
+
+    15% {
+        opacity: 0.0759;
+    }
+
+    20% {
+        opacity: 0.0163;
+    }
+
+    25% {
+        opacity: 0.0326;
+    }
+
+    30% {
+        opacity: 0.0535;
+    }
+
+    35% {
+        opacity: 0.0125;
+    }
+
+    40% {
+        opacity: 0.0461;
+    }
+
+    45% {
+        opacity: 0.0402;
+    }
+
+    50% {
+        opacity: 0.0239;
+    }
+
+    55% {
+        opacity: 0.0827;
+    }
+
+    60% {
+        opacity: 0.0329;
+    }
+
+    65% {
+        opacity: 0.0746;
+    }
+
+    70% {
+        opacity: 0.0631;
+    }
+
+    75% {
+        opacity: 0.0341;
+    }
+
+    80% {
+        opacity: 0.0635;
+    }
+
+    85% {
+        opacity: 0.0143;
+    }
+
+    90% {
+        opacity: 0.0617;
+    }
+
+    95% {
+        opacity: 0.0298;
+    }
+
+    100% {
+        opacity: 0.0392;
+    }
+}
+
+@layer utilities {
+    .text-shadow-glow {
+        text-shadow: 0 0 5px var(--term-green), 0 0 10px var(--term-green);
+    }
+
+    .text-shadow-amber {
+        text-shadow: 0 0 5px var(--term-amber), 0 0 10px var(--term-amber);
+    }
+
+    .border-glow {
+        box-shadow: 0 0 10px var(--term-green), inset 0 0 5px var(--term-green);
+    }
+
+    .border-glow-amber {
+        box-shadow: 0 0 10px var(--term-amber), inset 0 0 5px var(--term-amber);
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+}
